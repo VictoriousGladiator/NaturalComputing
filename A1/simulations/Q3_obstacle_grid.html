@@ -47,7 +47,7 @@ let config = {
     NRCELLS : [10, 0],
     RUNTIME : 500,
     zoom : 4,
-    CELLCOLOR : ["eaecef", "ff4d4d", "4d79ff"]
+    CELLCOLOR : ["ff4d4d", "4d79ff"]
     }
 }
 
@@ -100,7 +100,7 @@ function seedObstaclesRegular(spacing=50, margin=50, radius=6){
 let sim
 function initialize(){
   sim = new CPM.Simulation(config)
-  seedObstaclesRegular(30, 25, 6)
+  seedObstaclesRegular(25, 10, 2)
   step()
 }
 function step(){
