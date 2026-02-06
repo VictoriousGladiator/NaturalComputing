@@ -1,0 +1,122 @@
+<!-- Page setup and title -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html;
+charset=UTF-8">
+<title>PageTitle</title>
+<style type="text/css"> 
+body{
+    font-family: "HelveticaNeue-Light", sans-serif; padding : 15px;
+}
+</style>
+
+<!-- Sourcing the cpm build -->
+<script src="../artistoo_minimal/build/artistoo.js"></script>
+<script>
+"use strict"
+
+
+let config = {
+
+	// Grid settings
+	ndim : 3,
+	field_size : [200,200],
+	
+	// CPM parameters and configuration
+	conf : {
+		T : 20,			// CPM temperature
+				
+		// Adhesion parameters:
+		J: [[0,20, 30], 
+            [20,0, 0],
+            [30,0,0]],
+		
+		// VolumeConstraint parameters
+		LAMBDA_V : [0,50, 500],	// VolumeConstraint importance per cellkind
+		LAMBDA_P : [0,2, 50],
+		LAMBDA_ACT : [0,140, 0],
+		MAX_ACT : [0,50, 0],
+		ACT_MEAN : "arithmetic",
+		P : [0,340, 56],
+		V : [0,500, 250],		// Target volume of each cellkind
+
+	},
+	
+	// Simulation setup and configuration
+	simsettings : {
+    NRCELLS : [10, 0],
+    RUNTIME : 500,
+    zoom : 4,
+    CELLCOLOR : ["eaecef", "ff4d4d", "4d79ff"]
+    }
+}
+
+
+
+
+function makeCellOfKind(kind){
+  // Try newer API: makeNewCellID(kind)
+  if (sim.C.makeNewCellID.length >= 1){
+    return sim.C.makeNewCellID(kind)
+  }
+
+  // Fallback: create id, then set kind
+  const cid = sim.C.makeNewCellID()
+  sim.C.setCellKind(cid, kind)
+  return cid
+}
+
+function seedDisk(cid, cx, cy, r){
+  const r2 = r*r
+  for(let dx = -r; dx <= r; dx++){
+    for(let dy = -r; dy <= r; dy++){
+      if(dx*dx + dy*dy <= r2){
+        const x = cx + dx
+        const y = cy + dy
+        if(x >= 0 && x < config.field_size[0] && y >= 0 && y < config.field_size[1]){
+          sim.C.setpix([x,y], cid)
+        }
+      }
+    }
+  }
+}
+
+function seedObstaclesRegular(spacing=50, margin=50, radius=6){
+  for(let x = margin; x < config.field_size[0] - margin; x += spacing){
+    for(let y = margin; y < config.field_size[1] - margin; y += spacing){
+      const cid = makeCellOfKind(2)
+      seedDisk(cid, x, y, radius)
+    }
+  }
+}
+
+
+
+
+// // Initialize simulation for node
+// let sim = new CPM.Simulation( config )
+
+// Initialize simulation for html
+let sim
+function initialize(){
+  sim = new CPM.Simulation(config)
+  seedObstaclesRegular(30, 25, 6)
+  step()
+}
+function step(){
+    sim.step()
+    requestAnimationFrame( step )
+}
+
+// // Run with: node MyFirstSimulation.js
+// sim.run()
+
+</script>
+</head>
+<body onload="initialize()">
+<h1>Your Page Title</h1>
+<p>
+Description of your page.
+</p>
+</body>
+</html>

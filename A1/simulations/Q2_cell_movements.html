@@ -1,0 +1,82 @@
+<!-- Page setup and title -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html;
+charset=UTF-8">
+<title>PageTitle</title>
+<style type="text/css"> 
+body{
+    font-family: "HelveticaNeue-Light", sans-serif; padding : 15px;
+}
+</style>
+
+<!-- Sourcing the cpm build -->
+<script src="../artistoo_minimal/build/artistoo.js"></script>
+<script>
+"use strict"
+
+
+let config = {
+
+	// Grid settings
+	ndim : 2,
+	field_size : [200,200],
+	
+	// CPM parameters and configuration
+	conf : {
+		T : 20,			// CPM temperature
+				
+		// Adhesion parameters:
+		J: [[0,20], 
+            [20,0]],
+		
+		// VolumeConstraint parameters
+		LAMBDA_V : [0,2],	// VolumeConstraint importance per cellkind
+		LAMBDA_P : [0,2],
+		LAMBDA_ACT : [0,140],
+		MAX_ACT : [0,50],
+		ACT_MEAN : "arithmetic",
+		P : [0,340],
+		V : [0,500],		// Target volume of each cellkind
+
+	},
+	
+	// Simulation setup and configuration
+	simsettings : {
+		// Cells on the grid
+		NRCELLS : [75],		// Number of cells to seed for all
+					// non-background cellkinds.
+		RUNTIME : 500,                // Only used in node
+		zoom : 4,		// zoom in on canvas with this factor.
+        CELLCOLOR : ["eaecef", "ff4d4d"]
+
+	}
+}
+
+
+// // Initialize simulation for node
+// let sim = new CPM.Simulation( config )
+
+// Initialize simulation for html
+let sim
+function initialize(){
+    sim = new CPM.Simulation( config )
+    step()
+}
+function step(){
+    sim.step()
+    requestAnimationFrame( step )
+}
+
+// // Run with: node MyFirstSimulation.js
+// sim.run()
+
+</script>
+</head>
+<body onload="initialize()">
+<h1>Your Page Title</h1>
+<p>
+Description of your page.
+</p>
+</body>
+</html>

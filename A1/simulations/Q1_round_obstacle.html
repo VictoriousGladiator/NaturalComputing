@@ -1,0 +1,80 @@
+<!-- Page setup and title -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html;
+charset=UTF-8">
+<title>PageTitle</title>
+<style type="text/css"> 
+body{
+    font-family: "HelveticaNeue-Light", sans-serif; padding : 15px;
+}
+</style>
+
+<!-- Sourcing the cpm build -->
+<script src="../artistoo_minimal/build/artistoo.js"></script>
+<script>
+"use strict"
+
+
+let config = {
+
+	// Grid settings
+	ndim : 2,
+	field_size : [200,200],
+	
+	// CPM parameters and configuration
+	conf : {
+		T : 20,			// CPM temperature
+				
+		// Adhesion parameters:
+		J: [[0,30], 
+            [30,10]
+            ],
+		
+		// VolumeConstraint parameters
+		LAMBDA_V : [0,500],	// VolumeConstraint importance per cellkind
+		LAMBDA_P : [0,50],
+		P : [0,56],
+		V : [0,250]		// Target volume of each cellkind
+	},
+	
+	// Simulation setup and configuration
+	simsettings : {
+		// Cells on the grid
+		NRCELLS : [1],		// Number of cells to seed for all
+					// non-background cellkinds.
+		RUNTIME : 500,                // Only used in node
+		zoom : 4,		// zoom in on canvas with this factor.
+		CANVASCOLOR : "eaecef",
+	}
+}
+
+
+// // Initialize simulation for node
+// let sim = new CPM.Simulation( config )
+
+// Initialize simulation for html
+let sim
+function initialize(){
+    sim = new CPM.Simulation( config )
+    step()
+}
+function step(){
+    sim.step()
+    requestAnimationFrame( step )
+}
+
+// // Run with: node MyFirstSimulation.js
+// sim.run()
+
+</script>
+</head>
+<body onload="initialize()">
+<h1>Single round obstacle</h1>
+<p>
+Obstacle formed by a single "round" cell, as the weight in the
+ objective is put significantly more on volume the obstacle cell stays stable 
+and doesnt shimmer on the edges like when adhesion is the only constraint. 
+</p>
+</body>
+</html>
