@@ -31,10 +31,10 @@ let config = {
             [20,0]],
 		
 		// VolumeConstraint parameters
-		LAMBDA_V : [0,2],	// VolumeConstraint importance per cellkind
+		LAMBDA_V : [0,50],	// VolumeConstraint importance per cellkind
 		LAMBDA_P : [0,2],
 		LAMBDA_ACT : [0,140],
-		MAX_ACT : [0,50],
+		MAX_ACT : [0,20],
 		ACT_MEAN : "arithmetic",
 		P : [0,340],
 		V : [0,500],		// Target volume of each cellkind
@@ -48,7 +48,8 @@ let config = {
 					// non-background cellkinds.
 		RUNTIME : 500,                // Only used in node
 		zoom : 4,		// zoom in on canvas with this factor.
-        CELLCOLOR : ["eaecef", "ff4d4d"]
+		CANVASCOLOR: "eaecef",
+		ACTCOLOR : [true],
 
 	}
 }
