@@ -15,7 +15,9 @@ body{
 <script>
 "use strict"
 
-
+var volume = 1000;
+var radius = Math.sqrt(volume / Math.PI);
+var perimeter = 2 * Math.PI * radius;
 let config = {
 
 	// Grid settings
@@ -24,18 +26,18 @@ let config = {
 	
 	// CPM parameters and configuration
 	conf : {
-		T : 20,			// CPM temperature
+		T : 10,			// CPM temperature
 				
 		// Adhesion parameters:
-		J: [[0,30], 
-            [30,10]
+		J: [[0,18], 
+            [18,10]
             ],
 		
 		// VolumeConstraint parameters
-		LAMBDA_V : [0,500],	// VolumeConstraint importance per cellkind
-		LAMBDA_P : [0,50],
-		P : [0,56],
-		V : [0,250]		// Target volume of each cellkind
+		LAMBDA_V : [0,9],	// VolumeConstraint importance per cellkind
+		LAMBDA_P : [0,1.5],
+		P : [0,perimeter],
+		V : [0,volume]		// Target volume of each cellkind
 	},
 	
 	// Simulation setup and configuration
@@ -45,7 +47,8 @@ let config = {
 					// non-background cellkinds.
 		RUNTIME : 500,                // Only used in node
 		zoom : 4,		// zoom in on canvas with this factor.
-		CANVASCOLOR : "eaecef",
+		CANVASCOLOR : "eaecef", 
+		CELLCOLOR: "DA3E52",
 	}
 }
 
