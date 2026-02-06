@@ -1,0 +1,116 @@
+<!-- Page setup and title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Q2: Collective migration (lower activity)</title>
+  <style type="text/css">
+    body { font-family: "HelveticaNeue-Light", sans-serif; padding: 15px; }
+  </style>
+
+  <!-- Sourcing the cpm build -->
+  <script src="../artistoo_minimal/build/artistoo.js"></script>
+  <script>
+  "use strict"
+
+
+  let config = {
+    // Grid settings
+    ndim : 2,
+    field_size : [200,200],
+
+    // CPM parameters and configuration
+    conf : {
+      T : 20,
+
+      // Adhesion parameters:
+      J: [[0,20],
+          [20,0]],
+
+      // Volume/Perimeter
+      LAMBDA_V : [0,50],
+      LAMBDA_P : [0,2],
+      P : [0,180],
+      V : [0,200],
+
+      // ActivityConstraint parameters
+      LAMBDA_ACT : [0,200],
+      MAX_ACT : [0,20],
+      ACT_MEAN : "arithmetic",
+    },
+
+    // Simulation setup and configuration
+    simsettings : {
+      NRCELLS : [75], // 25, 50, 75, 100 
+      RUNTIME : 500,
+
+      zoom : 4,
+      CANVASCOLOR : "eaecef",
+
+
+
+      // Option B (single color for the whole kind) - uncomment if you prefer:
+      CELLCOLOR : ["ff4d4d"],
+
+      // Show borders to visualize separation between cells :contentReference[oaicite:4]{index=4}
+      SHOWBORDERS : [true],
+      BORDERCOL : ["000000"],
+
+      // Show the activity gradient overlay (needs LAMBDA_ACT>0) :contentReference[oaicite:5]{index=5}
+      ACTCOLOR : [true],
+    }
+  }
+
+  // Custom method: re-draw borders on top so they're still visible after ACTCOLOR overlays pixels.
+  const custommethods = {
+    drawOnTop : function(){
+      if( !this.helpClasses["canvas"] ){ return }
+      if( this.conf.hasOwnProperty("SHOWBORDERS") && this.conf["SHOWBORDERS"][0] ){
+        const bordercol = (this.conf["BORDERCOL"] && this.conf["BORDERCOL"][0]) ? this.conf["BORDERCOL"][0] : "000000"
+        this.Cim.drawCellBorders( 1, bordercol )
+      }
+    }
+  }
+
+  // Initialize simulation for html
+  let sim
+  function initialize(){
+    sim = new CPM.Simulation( config, custommethods )
+    step()
+  }
+  function step(){
+    sim.step()
+    requestAnimationFrame( step )
+  }
+  </script>
+</head>
+
+<body onload="initialize()">
+  <h1>Q2: Collective migration (lower activity)</h1>
+  <p>
+    Reproduction of the self-study exercise where cells keep moving even at higher densities.
+    This variant uses a lower activity persistence (see <code>MAX_ACT</code> in the config).
+  </p>
+  <p>
+    To explore the density effect, adjust <code>NRCELLS</code> in the config and reload.
+  </p>
+
+  <h2>Observations</h2>
+  <ul>
+    <li>
+      Cells still tend to cluster even when cell-cell adhesion is set to 0 (here: <code>J[1][1] = 0</code>).
+      In practice, the motion becomes constrained by neighbours and cells can "jam" in the direction of their
+      activity, forming a few relatively stable clusters.
+    </li>
+    <li>
+      This clustering can persist at higher seeding counts: newly seeded cells in empty space often wander for a
+      while and then join an existing cluster. Occasionally, a cell leaves a cluster and later reconnects,
+      which can lead to clusters merging into a larger one.
+    </li>
+    <li>
+      At near-confluent densities, the system tends to form one larger connected structure. Edge cells still
+      probe around, but generally remain attached to the main cohort.
+    </li>
+  </ul>
+</body>
+</html>
