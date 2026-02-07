@@ -15,45 +15,44 @@ body{
 <script>
 "use strict"
 
+// connection volume and perimeter of a circle
+var volume = 1000;
+var radius = Math.sqrt(volume / Math.PI);
+var perimeter = 2 * Math.PI * radius;
 
 let config = {
 
 	// Grid settings
 	ndim : 2,
-	field_size : [200,200],
+	field_size : [200, 200],
 	
 	// CPM parameters and configuration
 	conf : {
-		T : 20,			// CPM temperature
+		// Temperature
+		T : 10,		
 				
-		// Adhesion parameters:
-		J: [[0,30], 
-            [30,10]
+		// Adhesion
+		J: [
+			[0, 18], 
+            [18, 10]
             ],
 		
-		// VolumeConstraint parameters
-		LAMBDA_V : [0,500],	// VolumeConstraint importance per cellkind
-		LAMBDA_P : [0,50],
-		P : [0,56],
-		V : [0,250]		// Target volume of each cellkind
+		// Hamiltonian
+		LAMBDA_V : 		[0, 9],	
+		LAMBDA_P : 		[0, 1.5],
+		P : 			[0, perimeter],
+		V : 			[0, volume]		
 	},
 	
-	// Simulation setup and configuration
 	simsettings : {
-		// Cells on the grid
-		NRCELLS : [1],		// Number of cells to seed for all
-					// non-background cellkinds.
-		RUNTIME : 500,                // Only used in node
-		zoom : 4,		// zoom in on canvas with this factor.
-		CANVASCOLOR : "eaecef",
+		NRCELLS : 		[1],		
+		RUNTIME : 		500,                
+		zoom : 			4,	
+		CANVASCOLOR : 	"eaecef", 
+		CELLCOLOR: 		"DA3E52",
 	}
 }
 
-
-// // Initialize simulation for node
-// let sim = new CPM.Simulation( config )
-
-// Initialize simulation for html
 let sim
 function initialize(){
     sim = new CPM.Simulation( config )
@@ -63,9 +62,6 @@ function step(){
     sim.step()
     requestAnimationFrame( step )
 }
-
-// // Run with: node MyFirstSimulation.js
-// sim.run()
 
 </script>
 </head>
