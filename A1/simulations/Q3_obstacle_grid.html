@@ -13,10 +13,10 @@
   // ======= CONTROL OBSTACLE DENSITY HERE =======
   // Smaller spacing => higher obstacle density
   let OBSTACLE_SPACING = 30
-  let OBSTACLE_MARGIN  = 20
+  let OBSTACLE_MARGIN  = 30
 
   // (Optional) How many motile cells to seed (kind 1)
-  let N_CELLS = 20
+  let N_CELLS = 10
 
   let config = {
     ndim : 2,
@@ -93,16 +93,19 @@
     }
 
     // 2) Seed motile cells on a lattice offset by spacing/2 (so they don't overlap obstacles)
+    // 2) Seed motile cells randomly (avoid placing them inside obstacles)
     let seeded = 0
-    const offset = Math.floor(spacing/2)
+    while( seeded < N_CELLS ){
+    const x = margin + Math.floor( Math.random()*(W - 2*margin) )
+    const y = margin + Math.floor( Math.random()*(H - 2*margin) )
 
-    for( let x = margin + offset; x < W - margin; x += spacing ){
-      for( let y = margin + offset; y < H - margin; y += spacing ){
+    // only seed if the pixel is background (not already an obstacle)
+    if( this.C.pixt([x,y]) === 0 ){
         this.gm.seedCellAt( 1, [x,y] )
         seeded++
-        if( seeded >= N_CELLS ) return
-      }
     }
+    }
+
 
     // If you asked for more cells than fit in the offset lattice,
     // top up randomly:
