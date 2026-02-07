@@ -15,83 +15,115 @@
   let OBSTACLE_SPACING = 30
   let OBSTACLE_MARGIN  = 20
 
-var volume = 500;
-let config = {
+  // (Optional) How many motile cells to seed (kind 1)
+  let N_CELLS = 20
 
-	// Grid settings
-	ndim : 3,
-	field_size : [200,200],
-	
-	// CPM parameters and configuration
-	conf : {
-    // Temperature
-		T : 20,			
-				
-		// Adhesion
-		J: [
-        [0, 20, 30], 
-        [20, 0, 0],
-        [30, 0, 0]
-          ],
-		
-		// Hamiltonian
-		LAMBDA_V :        [0, 50, 500],	
-		LAMBDA_P :        [0, 2, 50],
-		LAMBDA_ACT :      [0, 140, 0],
-		MAX_ACT :         [0, 50, 0],
-		ACT_MEAN :        "arithmetic",
-		P :               [0, 340, 56],
-		V :               [0, volume, volume/2],		
+  let config = {
+    ndim : 2,
+    field_size : [200,200],
 
-	},
-	
-	simsettings : {
-    NRCELLS :         [10, 0],
-    RUNTIME :         500,
-    zoom :            4,
-    CELLCOLOR :       ["ff4d4d", "4d79ff"]
+    conf : {
+      T : 20,
+
+      // kind indices: 0 = background, 1 = motile cells, 2 = obstacles
+      J: [
+        [0, 20, 30],
+        [20, 0,  0],
+        [30, 0,  0]
+      ],
+
+      // Targets: cells ~500 px, obstacles ~250 px (≈ half size)
+      LAMBDA_V : [0, 50, 500],
+      V        : [0, 500, 250],
+
+      // Perimeter (your choices are fine; obstacle P≈circle for V=250 is ~56)
+      LAMBDA_P : [0,  2,  50],
+      P        : [0, 340, 56],
+
+      // Activity only for motile cells (kind 1)
+      LAMBDA_ACT : [0, 200, 0],
+      MAX_ACT    : [0,  20, 0],
+      ACT_MEAN   : "arithmetic"
+    },
+
+    simsettings : {
+      // IMPORTANT: must exist and have length = number of non-background kinds,
+      // even if we overwrite initializeGrid. :contentReference[oaicite:3]{index=3}
+      NRCELLS : [N_CELLS, 0],
+
+      RUNTIME : 500,
+      zoom : 4,
+      CANVASCOLOR : "eaecef",
+
+      // One color per non-background CellKind: [kind1, kind2]
+      CELLCOLOR : ["ff4d4d", "4d79ff"],
+
+      // Show separation between cells
+      SHOWBORDERS : [true, true],
+      BORDERCOL   : ["000000", "000000"],
+
+      // Show activity gradient (only meaningful for kind 1 here)
+      ACTCOLOR : [true, false]
     }
-}
+  }
 
-// custom methods for creating round static obstacle grid
-function seedDisk(kind, cx, cy, r){
-  const cid = gm.seedCellAt(kind, [cx, cy]);
-  const r2 = r*r
-  for(let dx = -r; dx <= r; dx++){
-    for(let dy = -r; dy <= r; dy++){
-      if(dx*dx + dy*dy <= r2){
-        const x = cx + dx
-        const y = cy + dy
-        if(x >= 0 && x < config.field_size[0] && y >= 0 && y < config.field_size[1]){
-          sim.C.setpix([x,y], cid)
-        }
+  // --- Custom init: seed obstacles on a lattice + seed cells on an offset lattice.
+  function initializeGrid(){
+    if( !this.helpClasses["gm"] ){ this.addGridManipulator() } // GridManipulator :contentReference[oaicite:4]{index=4}
+
+    const W = this.C.extents[0], H = this.C.extents[1]
+    const spacing = OBSTACLE_SPACING
+    const margin  = OBSTACLE_MARGIN
+
+    // obstacle radius from target volume: r ≈ sqrt(V/pi)
+    const Vobs = this.C.conf.V[2]  // kind 2
+    const rObs = Math.max(2, Math.round(Math.sqrt(Vobs / Math.PI)))
+
+    // 1) Seed obstacles regularly
+    for( let x = margin; x < W - margin; x += spacing ){
+      for( let y = margin; y < H - margin; y += spacing ){
+        // create a new obstacle cell at (x,y)
+        const cid = this.gm.seedCellAt( 2, [x,y] ) // seedCellAt :contentReference[oaicite:5]{index=5}
+
+        // make it a filled disk right away (so they start roughly half-sized)
+        let vox = []
+        vox = this.gm.makeCircle( [x,y], rObs, vox )          // makeCircle :contentReference[oaicite:6]{index=6}
+        this.gm.assignCellPixels( vox, 2, cid )               // assignCellPixels :contentReference[oaicite:7]{index=7}
       }
     }
-  }
-}
 
-function seedObstaclesRegular(spacing=50, margin=50, radius=6){
-  for(let x = margin; x < config.field_size[0] - margin; x += spacing){
-    for(let y = margin; y < config.field_size[1] - margin; y += spacing){
-      seedDisk(2, x, y, radius);
+    // 2) Seed motile cells on a lattice offset by spacing/2 (so they don't overlap obstacles)
+    let seeded = 0
+    const offset = Math.floor(spacing/2)
+
+    for( let x = margin + offset; x < W - margin; x += spacing ){
+      for( let y = margin + offset; y < H - margin; y += spacing ){
+        this.gm.seedCellAt( 1, [x,y] )
+        seeded++
+        if( seeded >= N_CELLS ) return
+      }
+    }
+
+    // If you asked for more cells than fit in the offset lattice,
+    // top up randomly:
+    while( seeded < N_CELLS ){
+      this.gm.seedCell( 1 )
+      seeded++
     }
   }
-}
 
-let sim;
-let gm;
-function initialize(){
-  sim = new CPM.Simulation(config)
-  gm = new CPM.GridManipulator(sim.C);
-  seedObstaclesRegular(25, 10, 2)
-  step()
-}
-function step(){
+  let sim
+  function initialize(){
+    const custommethods = { initializeGrid : initializeGrid }
+    sim = new CPM.Simulation( config, custommethods ) // overwrite initializeGrid :contentReference[oaicite:8]{index=8}
+    step()
+  }
+
+  function step(){
     sim.step()
     requestAnimationFrame( step )
-}
-
-</script>
+  }
+  </script>
 </head>
 
 <body onload="initialize()">
