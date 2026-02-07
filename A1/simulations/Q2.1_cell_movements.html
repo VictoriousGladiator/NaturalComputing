@@ -20,45 +20,40 @@ let config = {
 
 	// Grid settings
 	ndim : 2,
-	field_size : [200,200],
+	field_size : [200, 200],
 	
 	// CPM parameters and configuration
 	conf : {
-		T : 20,			// CPM temperature
+		// Temperature
+		T : 20,			
 				
-		// Adhesion parameters:
-		J: [[0,20], 
-            [20,0]],
+		// Adhesion 
+		J: [
+			[0, 20], 
+            [20, 0]
+			],
 		
-		// VolumeConstraint parameters
-		LAMBDA_V : [0,50],	// VolumeConstraint importance per cellkind
-		LAMBDA_P : [0,2],
-		LAMBDA_ACT : [0,140],
-		MAX_ACT : [0,20],
-		ACT_MEAN : "arithmetic",
-		P : [0,340],
-		V : [0,500],		// Target volume of each cellkind
+		// Hamiltonian
+		LAMBDA_V : 		[0, 50],	
+		LAMBDA_P : 		[0, 2],
+		LAMBDA_ACT : 	[0, 140],
+		MAX_ACT : 		[0, 20],
+		ACT_MEAN : 		"arithmetic",
+		P : 			[0, 340],
+		V : 			[0, 500],	
 
 	},
 	
-	// Simulation setup and configuration
 	simsettings : {
-		// Cells on the grid
-		NRCELLS : [75],		// Number of cells to seed for all
-					// non-background cellkinds.
-		RUNTIME : 500,                // Only used in node
-		zoom : 4,		// zoom in on canvas with this factor.
-		CANVASCOLOR: "eaecef",
-		ACTCOLOR : [true],
+		NRCELLS : 		[75],		
+		RUNTIME : 		500,                
+		zoom : 			4,		
+		CANVASCOLOR: 	"eaecef",
+		ACTCOLOR : 		[true],
 
 	}
 }
 
-
-// // Initialize simulation for node
-// let sim = new CPM.Simulation( config )
-
-// Initialize simulation for html
 let sim
 function initialize(){
     sim = new CPM.Simulation( config )
@@ -68,9 +63,6 @@ function step(){
     sim.step()
     requestAnimationFrame( step )
 }
-
-// // Run with: node MyFirstSimulation.js
-// sim.run()
 
 </script>
 </head>

@@ -24,33 +24,36 @@ let config = {
 	
 	// CPM parameters and configuration
 	conf : {
-		T : 20,			// CPM temperature
+    // Temperature
+		T : 20,			
 				
-		// Adhesion parameters:
-		J: [[0,20, 30], 
-            [20,0, 0],
-            [30,0,0]],
+		// Adhesion
+		J: [
+        [0, 20, 30], 
+        [20, 0, 0],
+        [30, 0, 0]
+          ],
 		
-		// VolumeConstraint parameters
-		LAMBDA_V : [0,50, 500],	// VolumeConstraint importance per cellkind
-		LAMBDA_P : [0,2, 50],
-		LAMBDA_ACT : [0,140, 0],
-		MAX_ACT : [0,50, 0],
-		ACT_MEAN : "arithmetic",
-		P : [0,340, 56],
-		V : [0,volume, volume/2],		// Target volume of each cellkind
+		// Hamiltonian
+		LAMBDA_V :        [0, 50, 500],	
+		LAMBDA_P :        [0, 2, 50],
+		LAMBDA_ACT :      [0, 140, 0],
+		MAX_ACT :         [0, 50, 0],
+		ACT_MEAN :        "arithmetic",
+		P :               [0, 340, 56],
+		V :               [0, volume, volume/2],		
 
 	},
 	
-	// Simulation setup and configuration
 	simsettings : {
-    NRCELLS : [10, 0],
-    RUNTIME : 500,
-    zoom : 4,
-    CELLCOLOR : ["ff4d4d", "4d79ff"]
+    NRCELLS :         [10, 0],
+    RUNTIME :         500,
+    zoom :            4,
+    CELLCOLOR :       ["ff4d4d", "4d79ff"]
     }
 }
 
+// custom methods for creating round static obstacle grid
 function seedDisk(kind, cx, cy, r){
   const cid = gm.seedCellAt(kind, [cx, cy]);
   const r2 = r*r
@@ -75,13 +78,6 @@ function seedObstaclesRegular(spacing=50, margin=50, radius=6){
   }
 }
 
-
-
-
-// // Initialize simulation for node
-// let sim = new CPM.Simulation( config )
-
-// Initialize simulation for html
 let sim;
 let gm;
 function initialize(){
@@ -94,9 +90,6 @@ function step(){
     sim.step()
     requestAnimationFrame( step )
 }
-
-// // Run with: node MyFirstSimulation.js
-// sim.run()
 
 </script>
 </head>

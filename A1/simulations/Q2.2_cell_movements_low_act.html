@@ -15,53 +15,47 @@
 
 
   let config = {
+
     // Grid settings
     ndim : 2,
-    field_size : [200,200],
+    field_size : [200, 200],
 
     // CPM parameters and configuration
     conf : {
+      // Temperature
       T : 20,
 
-      // Adhesion parameters:
-      J: [[0,20],
-          [20,0]],
+      // Adhesion
+      J: [
+          [0, 20],
+          [20, 0]
+          ],
 
-      // Volume/Perimeter
-      LAMBDA_V : [0,50],
-      LAMBDA_P : [0,2],
-      P : [0,180],
-      V : [0,200],
+      // Hamiltonian
+      LAMBDA_V :      [0, 50],
+      LAMBDA_P :      [0, 2],
+      P :             [0, 180],
+      V :             [0, 200],
 
-      // ActivityConstraint parameters
-      LAMBDA_ACT : [0,200],
-      MAX_ACT : [0,1],
-      ACT_MEAN : "arithmetic",
+      // Act-CPM
+      LAMBDA_ACT :    [0,200],
+      MAX_ACT :       [0, 1],
+      ACT_MEAN :      "arithmetic",
     },
 
-    // Simulation setup and configuration
     simsettings : {
-      NRCELLS : [75], // 25, 50, 75, 100 
-      RUNTIME : 500,
-
-      zoom : 4,
-      CANVASCOLOR : "eaecef",
-
-
-
-      // Option B (single color for the whole kind) - uncomment if you prefer:
-      CELLCOLOR : ["ff4d4d"],
-
-      // Show borders to visualize separation between cells :contentReference[oaicite:4]{index=4}
-      SHOWBORDERS : [true],
-      BORDERCOL : ["000000"],
-
-      // Show the activity gradient overlay (needs LAMBDA_ACT>0) :contentReference[oaicite:5]{index=5}
+      NRCELLS :       [75], // 25, 50, 75, 100 
+      RUNTIME :       500,
+      zoom :          4,
+      CANVASCOLOR :   "eaecef",
+      CELLCOLOR :     ["ff4d4d"],
+      SHOWBORDERS :   [true],
+      BORDERCOL :     ["000000"],
       ACTCOLOR : [true],
     }
   }
 
-  // Custom method: re-draw borders on top so they're still visible after ACTCOLOR overlays pixels.
+  // re-draw borders on top so they're still visible after ACTCOLOR overlays pixels.
   const custommethods = {
     drawOnTop : function(){
       if( !this.helpClasses["canvas"] ){ return }
@@ -72,7 +66,6 @@
     }
   }
 
-  // Initialize simulation for html
   let sim
   function initialize(){
     sim = new CPM.Simulation( config, custommethods )
