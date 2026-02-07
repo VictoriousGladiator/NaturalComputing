@@ -15,7 +15,7 @@ body{
 <script>
 "use strict"
 
-
+var volume = 500;
 let config = {
 
 	// Grid settings
@@ -38,7 +38,7 @@ let config = {
 		MAX_ACT : [0,50, 0],
 		ACT_MEAN : "arithmetic",
 		P : [0,340, 56],
-		V : [0,500, 250],		// Target volume of each cellkind
+		V : [0,volume, volume/2],		// Target volume of each cellkind
 
 	},
 	
@@ -51,22 +51,8 @@ let config = {
     }
 }
 
-
-
-
-function makeCellOfKind(kind){
-  // Try newer API: makeNewCellID(kind)
-  if (sim.C.makeNewCellID.length >= 1){
-    return sim.C.makeNewCellID(kind)
-  }
-
-  // Fallback: create id, then set kind
-  const cid = sim.C.makeNewCellID()
-  sim.C.setCellKind(cid, kind)
-  return cid
-}
-
-function seedDisk(cid, cx, cy, r){
+function seedDisk(kind, cx, cy, r){
+  const cid = gm.seedCellAt(kind, [cx, cy]);
   const r2 = r*r
   for(let dx = -r; dx <= r; dx++){
     for(let dy = -r; dy <= r; dy++){
@@ -84,8 +70,7 @@ function seedDisk(cid, cx, cy, r){
 function seedObstaclesRegular(spacing=50, margin=50, radius=6){
   for(let x = margin; x < config.field_size[0] - margin; x += spacing){
     for(let y = margin; y < config.field_size[1] - margin; y += spacing){
-      const cid = makeCellOfKind(2)
-      seedDisk(cid, x, y, radius)
+      seedDisk(2, x, y, radius);
     }
   }
 }
@@ -97,9 +82,11 @@ function seedObstaclesRegular(spacing=50, margin=50, radius=6){
 // let sim = new CPM.Simulation( config )
 
 // Initialize simulation for html
-let sim
+let sim;
+let gm;
 function initialize(){
   sim = new CPM.Simulation(config)
+  gm = new CPM.GridManipulator(sim.C);
   seedObstaclesRegular(25, 10, 2)
   step()
 }
