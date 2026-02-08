@@ -12,11 +12,14 @@
 
   // ======= CONTROL OBSTACLE DENSITY HERE =======
   // Smaller spacing => higher obstacle density
-  let OBSTACLE_SPACING = 30
-  let OBSTACLE_MARGIN  = 30
+  let OBSTACLE_SPACING = 25
+  let OBSTACLE_MARGIN  = 5
 
-  // (Optional) How many motile cells to seed (kind 1)
-  let N_CELLS = 10
+
+  let volume = 500
+  var radius = Math.sqrt(volume / Math.PI);
+  var perimeter = 2 * Math.PI * radius;
+  let N_CELLS = 20
 
   let config = {
     ndim : 2,
@@ -25,75 +28,59 @@
     conf : {
       T : 20,
 
-      // kind indices: 0 = background, 1 = motile cells, 2 = obstacles
+      // 0 = background, 1 = motile cells, 2 = obstacles
       J: [
         [0, 20, 30],
         [20, 0,  0],
         [30, 0,  0]
       ],
 
-      // Targets: cells ~500 px, obstacles ~250 px (≈ half size)
       LAMBDA_V : [0, 50, 500],
-      V        : [0, 500, 250],
+      V        : [0, volume, volume/2],
 
-      // Perimeter (your choices are fine; obstacle P≈circle for V=250 is ~56)
       LAMBDA_P : [0,  2,  50],
-      P        : [0, 340, 56],
+      P        : [0, 340, perimeter/2],
 
-      // Activity only for motile cells (kind 1)
       LAMBDA_ACT : [0, 200, 0],
       MAX_ACT    : [0,  20, 0],
       ACT_MEAN   : "arithmetic"
     },
 
     simsettings : {
-      // IMPORTANT: must exist and have length = number of non-background kinds,
-      // even if we overwrite initializeGrid. :contentReference[oaicite:3]{index=3}
       NRCELLS : [N_CELLS, 0],
-
       RUNTIME : 500,
       zoom : 4,
       CANVASCOLOR : "eaecef",
-
-      // One color per non-background CellKind: [kind1, kind2]
       CELLCOLOR : ["ff4d4d", "4d79ff"],
-
-      // Show separation between cells
       SHOWBORDERS : [true, true],
       BORDERCOL   : ["000000", "000000"],
-
-      // Show activity gradient (only meaningful for kind 1 here)
       ACTCOLOR : [true, false]
     }
   }
 
-  // --- Custom init: seed obstacles on a lattice + seed cells on an offset lattice.
+  // seed obstacles on a lattice + seed cells on an offset lattice.
   function initializeGrid(){
-    if( !this.helpClasses["gm"] ){ this.addGridManipulator() } // GridManipulator :contentReference[oaicite:4]{index=4}
+    if( !this.helpClasses["gm"] ){ this.addGridManipulator() }
 
     const W = this.C.extents[0], H = this.C.extents[1]
     const spacing = OBSTACLE_SPACING
     const margin  = OBSTACLE_MARGIN
 
-    // obstacle radius from target volume: r ≈ sqrt(V/pi)
-    const Vobs = this.C.conf.V[2]  // kind 2
+    const Vobs = this.C.conf.V[2] 
     const rObs = Math.max(2, Math.round(Math.sqrt(Vobs / Math.PI)))
 
     // 1) Seed obstacles regularly
     for( let x = margin; x < W - margin; x += spacing ){
       for( let y = margin; y < H - margin; y += spacing ){
         // create a new obstacle cell at (x,y)
-        const cid = this.gm.seedCellAt( 2, [x,y] ) // seedCellAt :contentReference[oaicite:5]{index=5}
-
-        // make it a filled disk right away (so they start roughly half-sized)
+        const cid = this.gm.seedCellAt( 2, [x,y] )
         let vox = []
-        vox = this.gm.makeCircle( [x,y], rObs, vox )          // makeCircle :contentReference[oaicite:6]{index=6}
-        this.gm.assignCellPixels( vox, 2, cid )               // assignCellPixels :contentReference[oaicite:7]{index=7}
+        vox = this.gm.makeCircle( [x,y], rObs, vox )          
+        this.gm.assignCellPixels( vox, 2, cid )               
       }
     }
 
-    // 2) Seed motile cells on a lattice offset by spacing/2 (so they don't overlap obstacles)
-    // 2) Seed motile cells randomly (avoid placing them inside obstacles)
+    // 2) Seed motile cells on a lattice 
     let seeded = 0
     while( seeded < N_CELLS ){
     const x = margin + Math.floor( Math.random()*(W - 2*margin) )
@@ -106,9 +93,6 @@
     }
     }
 
-
-    // If you asked for more cells than fit in the offset lattice,
-    // top up randomly:
     while( seeded < N_CELLS ){
       this.gm.seedCell( 1 )
       seeded++
@@ -118,7 +102,7 @@
   let sim
   function initialize(){
     const custommethods = { initializeGrid : initializeGrid }
-    sim = new CPM.Simulation( config, custommethods ) // overwrite initializeGrid :contentReference[oaicite:8]{index=8}
+    sim = new CPM.Simulation( config, custommethods ) 
     step()
   }
 
