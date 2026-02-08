@@ -3,8 +3,8 @@ const path = require("path");
 const artistooPath = path.join(__dirname, "../artistoo_minimal/build/artistoo-cjs.js");
 const CPM = require(artistooPath);
 
-let OBSTACLE_SPACING = 25
-let OBSTACLE_MARGIN  = 5
+let OBSTACLE_SPACING = 75
+let OBSTACLE_MARGIN  = 20
 let N_CELLS = 20
 
 let config = {
