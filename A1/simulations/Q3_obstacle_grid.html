@@ -12,9 +12,12 @@
 
   // ======= CONTROL OBSTACLE DENSITY HERE =======
   // Smaller spacing => higher obstacle density
-  let OBSTACLE_SPACING = 75
-  let OBSTACLE_MARGIN  = 20
+  let OBSTACLE_SPACING = 30
+  let OBSTACLE_MARGIN  = 40
 
+  // true  = place motile cells INSIDE the obstacle grid region (your current code)
+  // false = place motile cells OUTSIDE that region (in the border band)
+  let PLACEMENT_GRID = false
 
   let volume = 500
   var radius = Math.sqrt(volume / Math.PI);
@@ -79,20 +82,38 @@
         this.gm.assignCellPixels( vox, 2, cid )               
       }
     }
+    function isInsideObstacleRegion(x,y){
+      return (x >= margin && x < W - margin && y >= margin && y < H - margin)
+    }
 
-    // 2) Seed motile cells on a lattice 
+    // 2) Seed motile cells inside or outside the obstacle region, depending on PLACEMENT_GRID
     let seeded = 0
-    while( seeded < N_CELLS ){
-    const x = margin + Math.floor( Math.random()*(W - 2*margin) )
-    const y = margin + Math.floor( Math.random()*(H - 2*margin) )
+    let attempts = 0    
+    const maxAttempts = N_CELLS * 500
 
-    // only seed if the pixel is background (not already an obstacle)
-    if( this.C.pixt([x,y]) === 0 ){
+    while( seeded < N_CELLS && attempts < maxAttempts){
+   attempts++
+
+      let x, y
+
+      if( PLACEMENT_GRID ){
+        // INSIDE
+        x = margin + Math.floor( Math.random()*(W - 2*margin) )
+        y = margin + Math.floor( Math.random()*(H - 2*margin) )
+      } else {
+        // OUTSIDE
+        x = Math.floor( Math.random()*W )
+        y = Math.floor( Math.random()*H )
+        if( isInsideObstacleRegion(x,y) ) continue
+      }
+
+      // only seed if the pixel is background (not already an obstacle/cell)
+      if( this.C.pixt([x,y]) === 0 ){
         this.gm.seedCellAt( 1, [x,y] )
         seeded++
+      }
     }
-    }
-
+    // fallback
     while( seeded < N_CELLS ){
       this.gm.seedCell( 1 )
       seeded++
