@@ -12,8 +12,9 @@
 
   // ======= CONTROL OBSTACLE DENSITY HERE =======
   // Smaller spacing => higher obstacle density
-  let OBSTACLE_SPACING = 30
-  let OBSTACLE_MARGIN  = 40
+  let OBSTACLE_SPACING = 40
+  let OBSTACLE_MARGIN  = 5
+  
 
   // true  = place motile cells INSIDE the obstacle grid region (your current code)
   // false = place motile cells OUTSIDE that region (in the border band)
@@ -41,7 +42,7 @@
       LAMBDA_V : [0, 50, 500],
       V        : [0, volume, volume/2],
 
-      LAMBDA_P : [0,  2,  50],
+      LAMBDA_P : [0,  1,  50],
       P        : [0, 340, perimeter/2],
 
       LAMBDA_ACT : [0, 200, 0],
