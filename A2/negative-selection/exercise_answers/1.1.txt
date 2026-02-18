@@ -1,0 +1,3 @@
+The first figure in the assignment matches r(switch)=1.
+Second figure with AUC=0.59 is the one with r=7.
+Last figure with AUC=0.79 is the one with r=4.

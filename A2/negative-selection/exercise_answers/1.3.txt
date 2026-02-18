@@ -1,0 +1,7 @@
+python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/hiligaynon.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 
+
+python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/middle-english.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 
+
+python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/plautdietsch.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 
+
+python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/xhosa.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 

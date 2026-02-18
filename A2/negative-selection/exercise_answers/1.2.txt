@@ -1,0 +1,16 @@
+Initially, increasing r (the number of mismatches/switches allowed when matching length-10 substrings against the English training data) improves the AUC. 
+Going from r = 1 to r = 3, the AUC rises from about 0.54 (only slightly better than random guessing, AUC = 0.5) to about 0.83, 
+meaning the classifier separates English from Tagalog much better.
+
+A reasonable explanation is that with very small r the model is too strict as many English test substrings will not match well enough,
+ so English strings can be incorrectly flagged as non-English, which increases false positives and hurts discrimination. 
+ Allowing a few mismatches makes the model more tolerant to natural variation in English and helps it capture broader English patterns rather than only exact substrings seen in training.
+
+However, when r becomes too large, the AUC starts to drop again. 
+With high values (e.g., r = 8–9), the matching becomes so permissive that almost any substring 
+can be considered close enough to something in English.
+This makes the score distributions for English and Tagalog overlap heavily, so the classifier loses separation power. 
+In our results, r = 9 gives near-random performance (AUC = 0.51).
+
+Overall, the best discrimination is achieved at a moderate r = 3 , 
+where the model balances being tolerant enough to generalize within English but not so tolerant that it also accepts Tagalog as English.
