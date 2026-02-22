@@ -1,0 +1,4 @@
+The method is based on checking length-n substrings, so if the input is shorter than n there are no such substrings to match and the score becomes trivial and uninformative. 
+If the input is much longer, it contains many more length-n substrings, 
+which creates many more chances for matches and makes the score grow mainly with length rather than with how English-like the content is, 
+so scores across examples stop being comparable unless you normalize for length.

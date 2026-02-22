@@ -5,3 +5,20 @@ python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.
 python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/plautdietsch.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 
 
 python .\roc_auc.py --jar .\negsel2.jar --train .\english.train --neg .\english.test --pos ./lang/xhosa.txt --n 10 --r-min 2 --r-max 5 --save-rocs --plot 
+
+ Which languages can be best discriminated from
+English using the negative selection algorithm, and for which is this most difficult? Explain your findings
+
+hiligaynon best AUC=0.84
+middle english best AUC=0.54
+plautdietsch best AUC 0.775
+Tagalog best AUC=0.83
+xhosa best AUC = 0.89
+
+Across all languages, the best discrimination was consistently achieved at r = 3,
+ suggesting this value gives the best balance between being strict enough to capture “English-ness” and flexible enough to generalize beyond exact substrings.
+
+The negative selection model separates Xhosan best from English (AUC = 0.89) which suggests it is the mostl easily separable from english based of the 10 character sequences fro mthe presented languages.
+It is followed by Hiligaynon (0.84) and Plautdietsch still reasonably separable (0.775). 
+The most difficult case is Middle English (AUC = 0.54), which is close to random performance, 
+likely because its character patterns and short substrings overlap heavily with modern English, causing strong score overlap and weak ROC separation.
