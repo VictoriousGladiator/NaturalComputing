@@ -5,18 +5,18 @@ const artistooPath = path.join(__dirname, "../artistoo_minimal/build/artistoo-cj
 const CPM = require(artistooPath);
 
 // ======= match your HTML params =======
-let OBSTACLE_SPACING = 20;
-let OBSTACLE_MARGIN = 5;
+let OBSTACLE_SPACING = 75;
+let OBSTACLE_MARGIN = 20;
 
 // true  = place motile cells INSIDE the obstacle grid region
 // false = place motile cells OUTSIDE that region (in the border band)
-let PLACEMENT_GRID = true;
+let PLACEMENT_GRID = false;
 
 let volume = 500;
 let radius = Math.sqrt(volume / Math.PI);
 let perimeter = 2 * Math.PI * radius;
 
-let N_CELLS = 20;
+let N_CELLS = 60;
 
 // Save images to a unique folder per run
 const runFolder = path.join(
@@ -43,17 +43,17 @@ let config = {
     V: [0, volume, volume / 2],
 
     // match HTML (your Node version had different P/LAMBDA_P)
-    LAMBDA_P: [0, 1, 50],
+    LAMBDA_P: [0, 2, 50],
     P: [0, 340, perimeter / 2],
 
     LAMBDA_ACT: [0, 200, 0],
-    MAX_ACT: [0, 20, 0],
+    MAX_ACT: [0, 80, 0],
     ACT_MEAN: "arithmetic",
   },
 
   simsettings: {
     NRCELLS: [N_CELLS, 0],
-    RUNTIME: 11620, // about a minute on my machine 
+    RUNTIME: 11001, // about a minute on my machine 
     zoom: 4,
     CANVASCOLOR: "eaecef",
     CELLCOLOR: ["ff4d4d", "4d79ff"],

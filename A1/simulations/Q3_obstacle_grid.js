@@ -3,9 +3,9 @@ const path = require("path");
 const artistooPath = path.join(__dirname, "../artistoo_minimal/build/artistoo-cjs.js");
 const CPM = require(artistooPath);
 
-let OBSTACLE_SPACING = 75
-let OBSTACLE_MARGIN  = 20
-let N_CELLS = 20
+let OBSTACLE_SPACING = 25
+let OBSTACLE_MARGIN  = 5
+let N_CELLS = 75
 
 let config = {
     ndim : 2,
@@ -28,7 +28,7 @@ let config = {
       P        : [0, 340, 56],
 
       LAMBDA_ACT : [0, 200, 0],
-      MAX_ACT    : [0,  20, 0],
+      MAX_ACT    : [0,  80, 0],
       ACT_MEAN   : "arithmetic"
     },
 
