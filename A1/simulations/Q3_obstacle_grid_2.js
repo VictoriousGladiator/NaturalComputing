@@ -5,8 +5,8 @@ const artistooPath = path.join(__dirname, "../artistoo_minimal/build/artistoo-cj
 const CPM = require(artistooPath);
 
 // ======= match your HTML params =======
-let OBSTACLE_SPACING = 75;
-let OBSTACLE_MARGIN = 20;
+let OBSTACLE_SPACING = 250;
+let OBSTACLE_MARGIN = 200;
 
 // true  = place motile cells INSIDE the obstacle grid region
 // false = place motile cells OUTSIDE that region (in the border band)
