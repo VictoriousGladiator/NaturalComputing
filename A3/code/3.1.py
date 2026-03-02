@@ -6,174 +6,196 @@ from skimage.transform import resize
 
 
 # ============================================================
-# 1. IMAGE LOADING + PREPROCESSING
+# 1. DATA ACQUISITION AND INITIAL PROCESSING
 # ============================================================
 
-def load_and_resize_image(path, size=(128, 128)):
+def acquire_and_scale_picture(file_path, dimensions=(128, 128)):
     """
-    Load an image and optionally resize it.
+    Load a picture and optionally scale it.
     
     Parameters:
-        path (str): Path to image file
-        size (tuple): Desired size (H, W)
+        file_path (str): Path to picture file
+        dimensions (tuple): Desired dimensions (H, W)
         
     Returns:
-        image (float array): Image normalized to [0,1]
+        picture (float array): Picture normalized to [0,1]
     """
-    image = io.imread(path)
+    picture = io.imread(file_path)
     
-    # Convert to float in [0,1]
-    image = image / 255.0
+    # Transform to floating point in [0,1]
+    picture = picture / 255.0
     
-    # Resize for faster PSO if needed
-    image = resize(image, size, anti_aliasing=True)
+    # Scale for improved processing speed
+    picture = resize(picture, dimensions, anti_aliasing=True)
     
-    return image
+    return picture
 
 
 # ============================================================
-# 2. QUANTIZATION WITH GIVEN PALETTE
+# 2. GRAPHICAL OUTPUT UTILITIES
 # ============================================================
 
-def quantize_image(image, palette):
+def display_palette(palette_array):
     """
-    Quantize an image using a fixed color palette.
+    Display palette as colored rectangles.
+    """
+    K = palette_array.shape[0]
+    plt.figure(figsize=(K, 1))
+    plt.imshow([palette_array])
+    plt.axis("off")
+    plt.title("Extracted Color Palette")
+    plt.show()
+
+
+def display_picture(picture_array, caption="Picture"):
+    plt.figure(figsize=(4, 4))
+    plt.imshow(picture_array)
+    plt.axis("off")
+    plt.title(caption)
+    plt.show()
+
+
+# ============================================================
+# 3. PALETTE-BASED COMPRESSION
+# ============================================================
+
+def compress_with_palette(picture, palette):
+    """
+    Compress a picture using a predetermined color palette.
     
     Parameters:
-        image   : (H, W, 3) float image in [0,1]
+        picture   : (H, W, 3) float picture in [0,1]
         palette : (K, 3) array of RGB colors
         
     Returns:
-        quantized image
+        compressed picture
     """
-    H, W, _ = image.shape
+    H, W, _ = picture.shape
     
-    # Flatten image to (N, 3)
-    pixels = image.reshape(-1, 3)
+    # Flatten picture to (N, 3)
+    pixels = picture.reshape(-1, 3)
     
-    # Compute distance between each pixel and each palette color
+    # Calculate distance between each pixel and each palette color
     # Result shape: (N, K)
     distances = np.linalg.norm(
         pixels[:, None, :] - palette[None, :, :],
         axis=2
     )
     
-    # For each pixel, find closest palette index
-    closest_color_idx = np.argmin(distances, axis=1)
+    # For each pixel, identify nearest palette index
+    nearest_idx = np.argmin(distances, axis=1)
     
-    # Replace each pixel with closest palette color
-    quantized_pixels = palette[closest_color_idx]
+    # Substitute each pixel with nearest palette color
+    compressed_pixels = palette[nearest_idx]
     
-    # Reshape back to image
-    quantized_image = quantized_pixels.reshape(H, W, 3)
+    # Reshape back to picture
+    compressed_picture = compressed_pixels.reshape(H, W, 3)
     
-    return quantized_image
+    return compressed_picture
 
 
 # ============================================================
-# 3. FITNESS FUNCTION FOR PSO
+# 4. PERFORMANCE METRIC
 # ============================================================
 
-def quantization_error(image, palette):
+def compression_error(picture, palette):
     """
-    Compute total squared quantization error.
+    Calculate total squared compression error.
     
     Fitness function to minimize.
     """
-    H, W, _ = image.shape
-    pixels = image.reshape(-1, 3)
+    H, W, _ = picture.shape
+    pixels = picture.reshape(-1, 3)
     
     distances = np.linalg.norm(
         pixels[:, None, :] - palette[None, :, :],
         axis=2
     )
     
-    min_distances = np.min(distances, axis=1)
+    minimal_distances = np.min(distances, axis=1)
     
-    # Return total squared error
-    return np.sum(min_distances ** 2)
+    # Return total squared deviation
+    return np.sum(minimal_distances ** 2)
 
 
 # ============================================================
-# 4. PARTICLE SWARM OPTIMIZATION FOR CLUSTERING
+# 5. SWARM INTELLIGENCE OPTIMIZER
 # ============================================================
 
-class PSOColorQuantizer:
+class SwarmOptimizer:
     """
-    PSO implementation for color quantization.
-    Each particle represents a color palette of size K.
+    Swarm intelligence implementation for palette optimization.
+    Each agent represents a color palette of size K.
     """
 
-    def __init__(self, image, K=8, n_particles=20,
-                 omega=0.7, alpha1=1.5, alpha2=1.5,
-                 n_iterations=30):
+    def __init__(self, picture, K=8, agent_count=20, inertia=0.7, cognitive=1.5, social=1.5, max_iterations=30):
         
-        self.image = image
+        self.picture = picture
         self.K = K
         self.dim = 3 * K  # Each color has 3 values (RGB)
-        self.n_particles = n_particles
-        self.omega = omega
-        self.alpha1 = alpha1
-        self.alpha2 = alpha2
-        self.n_iterations = n_iterations
+        self.agent_count = agent_count
+        self.inertia = inertia
+        self.cognitive = cognitive
+        self.social = social
+        self.max_iterations = max_iterations
         
         # Flattened pixel array (for faster evaluation)
-        self.pixels = image.reshape(-1, 3)
+        self.pixels = picture.reshape(-1, 3)
         
-        # Initialize particles
-        self.initialize_particles()
+        # Initialize agents
+        self.setup_agents()
         
         # History storage
         self.history_global_best = []
         self.history_fitness = []
 
-    def initialize_particles(self):
+    def setup_agents(self):
         """
-        Initialize particle positions and velocities.
+        Initialize agent positions and velocities.
         """
         # Random positions in [0,1]
-        self.positions = np.random.rand(self.n_particles, self.dim)
+        self.positions = np.random.rand(self.agent_count, self.dim)
         
         # Initialize velocities to zero
-        self.velocities = np.zeros((self.n_particles, self.dim))
+        self.velocities = np.zeros((self.agent_count, self.dim))
         
-        # Local best positions
-        self.local_best_positions = self.positions.copy()
+        # Personal best positions
+        self.personal_best_positions = self.positions.copy()
         
         # Evaluate initial fitness
-        self.local_best_scores = np.array([
-            self.evaluate_particle(p)
+        self.personal_best_scores = np.array([
+            self.evaluate_agent(p)
             for p in self.positions
         ])
         
         # Global best
-        best_idx = np.argmin(self.local_best_scores)
-        self.global_best_position = self.local_best_positions[best_idx].copy()
-        self.global_best_score = self.local_best_scores[best_idx]
+        best_idx = np.argmin(self.personal_best_scores)
+        self.global_best_position = self.personal_best_positions[best_idx].copy()
+        self.global_best_score = self.personal_best_scores[best_idx]
 
-    def evaluate_particle(self, particle):
+    def evaluate_agent(self, agent):
         """
-        Evaluate fitness of a particle.
+        Evaluate fitness of an agent.
         """
-        palette = particle.reshape(self.K, 3)
-        return quantization_error(self.image, palette)
+        palette = agent.reshape(self.K, 3)
+        return compression_error(self.picture, palette)
 
     def optimize(self):
         """
-        Run PSO iterations.
+        Execute swarm optimization iterations.
         """
-        for iteration in range(self.n_iterations):
+        for iteration in range(self.max_iterations):
             
-            for i in range(self.n_particles):
+            for i in range(self.agent_count):
                 
                 r1 = np.random.rand(self.dim)
                 r2 = np.random.rand(self.dim)
                 
                 # Velocity update
                 self.velocities[i] = (
-                    self.omega * self.velocities[i]
-                    + self.alpha1 * r1 * (self.local_best_positions[i] - self.positions[i])
-                    + self.alpha2 * r2 * (self.global_best_position - self.positions[i])
+                    self.inertia * self.velocities[i]
+                    + self.cognitive * r1 * (self.personal_best_positions[i] - self.positions[i])
+                    + self.social * r2 * (self.global_best_position - self.positions[i])
                 )
                 
                 # Position update
@@ -183,12 +205,12 @@ class PSOColorQuantizer:
                 self.positions[i] = np.clip(self.positions[i], 0, 1)
                 
                 # Evaluate new fitness
-                fitness = self.evaluate_particle(self.positions[i])
+                fitness = self.evaluate_agent(self.positions[i])
                 
-                # Update local best
-                if fitness < self.local_best_scores[i]:
-                    self.local_best_scores[i] = fitness
-                    self.local_best_positions[i] = self.positions[i].copy()
+                # Update personal best
+                if fitness < self.personal_best_scores[i]:
+                    self.personal_best_scores[i] = fitness
+                    self.personal_best_positions[i] = self.positions[i].copy()
                 
                 # Update global best
                 if fitness < self.global_best_score:
@@ -199,90 +221,66 @@ class PSOColorQuantizer:
             self.history_global_best.append(self.global_best_position.copy())
             self.history_fitness.append(self.global_best_score)
             
-            print(f"Iteration {iteration+1}/{self.n_iterations}, "
+            print(f"Iteration {iteration+1}/{self.max_iterations}, "
                   f"Best Fitness: {self.global_best_score:.4f}")
 
         return self.global_best_position.reshape(self.K, 3)
 
 
 # ============================================================
-# 5. K-MEANS COMPARISON
+# 6. TRADITIONAL CLUSTERING APPROACH
 # ============================================================
 
-def kmeans_quantization(image, K=8):
+def kmeans_compression(picture, K=8):
     """
-    Perform K-means clustering for color quantization.
+    Perform K-means clustering for palette extraction.
     """
-    H, W, _ = image.shape
-    pixels = image.reshape(-1, 3)
+    H, W, _ = picture.shape
+    pixels = picture.reshape(-1, 3)
     
     kmeans = KMeans(n_clusters=K, n_init=10)
     labels = kmeans.fit_predict(pixels)
     
     palette = kmeans.cluster_centers_
     
-    quantized_pixels = palette[labels]
+    compressed_pixels = palette[labels]
     
-    return quantized_pixels.reshape(H, W, 3), palette
+    return compressed_pixels.reshape(H, W, 3), palette
 
 
 # ============================================================
-# 6. VISUALIZATION UTILITIES
-# ============================================================
-
-def show_palette(palette):
-    """
-    Display palette as color squares.
-    """
-    K = palette.shape[0]
-    plt.figure(figsize=(K, 1))
-    plt.imshow([palette])
-    plt.axis("off")
-    plt.title("Color Palette")
-    plt.show()
-
-
-def show_image(image, title="Image"):
-    plt.figure(figsize=(4, 4))
-    plt.imshow(image)
-    plt.axis("off")
-    plt.title(title)
-    plt.show()
-
-
-# ============================================================
-# 7. MAIN EXECUTION EXAMPLE
+# 7. PRIMARY EXECUTION BLOCK
 # ============================================================
 
 if __name__ == "__main__":
     
-    # Load image
-    image = load_and_resize_image("A3/si-exercises/exercise_pso/image.png", size=(128, 128))
+    # Acquire picture
+    picture = acquire_and_scale_picture("A3/si-exercises/exercise_pso/image.png", dimensions=(128, 128))
     
-    show_image(image, "Original Image")
-    
-    # -------------------------
-    # PSO Quantization
-    # -------------------------
-    pso = PSOColorQuantizer(image, K=8, n_particles=20, n_iterations=30)
-    best_palette = pso.optimize()
-    
-    quantized_pso = quantize_image(image, best_palette)
-    
-    show_palette(best_palette)
-    show_image(quantized_pso, "PSO Quantized Image")
+    display_picture(picture, "Original Picture")
     
     # -------------------------
-    # K-Means Quantization
+    # Swarm-Based Compression
     # -------------------------
-    quantized_kmeans, kmeans_palette = kmeans_quantization(image, K=8)
+    swarm = SwarmOptimizer(picture, K=8, agent_count=20, max_iterations=30)
+    optimal_palette = swarm.optimize()
     
-    show_palette(kmeans_palette)
-    show_image(quantized_kmeans, "K-Means Quantized Image")
+    compressed_swarm = compress_with_palette(picture, optimal_palette)
     
-    # Compare fitness
-    pso_error = quantization_error(image, best_palette)
-    kmeans_error = quantization_error(image, kmeans_palette)
+    display_palette(optimal_palette)
+    display_picture(compressed_swarm, "Swarm-Optimized Picture")
     
-    print("PSO Error:", pso_error)
-    print("K-Means Error:", kmeans_error)
+    # -------------------------
+    # K-Means Compression
+    # -------------------------
+    compressed_kmeans, kmeans_palette = kmeans_compression(picture, K=8)
+    
+    display_palette(kmeans_palette)
+    display_picture(compressed_kmeans, "K-Means Compressed Picture")
+    
+    # Compare errors
+    swarm_error = compression_error(picture, optimal_palette)
+    kmeans_error = compression_error(picture, kmeans_palette)
+    
+    print("Swarm Method Error:", swarm_error)
+    print("K-Means Method Error:", kmeans_error)
