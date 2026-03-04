@@ -6,83 +6,98 @@ const fs = require( 'fs' )
 
 
 class Particle {
-	constructor( Scene, i ){
+	constructor(Scene, i) {
 		this.S = Scene
-		this.speed = 1 
+		this.speed = 1
 		this.id = i
-		this.pos = this.S.randomPosition() 
+		this.pos = this.S.randomPosition()
 		this.dir = this.S.randomDirection()
 	}
 	// return a + b
-	addVectors( a, b ){
+	addVectors(a, b) {
 		const dim = a.length
 		let out = []
-		for( let d = 0; d < dim; d++ ){
-			out.push( a[d] + b[d] )
+		for (let d = 0; d < dim; d++) {
+			out.push(a[d] + b[d])
 		}
 		return out
 	}
 	// return a - b
-	subtractVectors( a, b ){
+	subtractVectors(a, b) {
 		const dim = a.length
 		let out = []
-		for( let d = 0; d < dim; d++ ){
-			out.push( a[d] - b[d] )
+		for (let d = 0; d < dim; d++) {
+			out.push(a[d] - b[d])
 		}
 		return out
 	}
 	// multiply vector by a constant
-	multiplyVector( a, c ){
-		return a.map(( x ) => x * c ) 
+	multiplyVector(a, c) {
+		return a.map((x) => x * c)
 	}
 	// normalize vector to unit length
-	normalizeVector( a ){
+	normalizeVector(a) {
 		return this.S.normalizeVector(a)
 	}
-	
+
 	// should return a unit vector in average neighbor direction for neighbors within 
 	// distance neighborRadius 
-	alignmentVector( neighborRadius ){
-		
-		return this.dir
-	
+	alignmentVector(neighborRadius) {
+		let neighbors = this.S.neighbours(this, neighborRadius)
+		let N = neighbors.length
+		if (N == 0) return this.dir
+
+		let direction = [0, 0]
+		for (let n = 0; n < N; n++) {
+			direction = this.addVectors(direction, neighbors[n].dir)
+		}
+		direction = this.multiplyVector(direction, 1 / N)
+		return this.normalizeVector(direction)
+
 	}
-	
+
 	// should return a unit vector in the direction from current position to the 
 	// average position of neighbors within distance neighborRadius 
-	cohesionVector( neighborRadius ){
-		
-		return this.dir
-	
+	cohesionVector(neighborRadius) {
+		let neighbors = this.S.neighbours(this, neighborRadius)
+		let N = neighbors.length
+		if (N == 0) return this.dir
+
+		let center = [0, 0]
+		for (let n = 0; n < N; n++) {
+			center = this.addVectors(center, this.S.wrap(neighbors[n].pos, this.pos))
+		}
+		center = this.multiplyVector(center, 1 / N)
+		let direction = this.subtractVectors(center, this.pos)
+		return this.normalizeVector(direction)
+
 	}
-	
+
 	// as cohesionVector, but now return the opposite direction for the given 
-	separationVector( neighborRadius ){
-		
-		return this.dir 
-		
+	separationVector(neighborRadius) {
+		return this.multiplyVector(this.cohesionVector(neighborRadius), -1)
+
 	}
-	
-	updateVector(){
-		
+
+	updateVector() {
 		let align_weight = this.S.conf.alignment
 		let cohesion_weight = this.S.conf.cohesion
 		let separation_weight = this.S.conf.separation
-		
-		const align = this.multiplyVector( this.alignmentVector( this.S.conf.outerRadius ), align_weight )
-		const cohesion = this.multiplyVector(this.cohesionVector( this.S.conf.outerRadius ), cohesion_weight )
-		const separation = this.multiplyVector( this.separationVector(this.S.conf.innerRadius ), separation_weight )
-		
-		// Add your code to combine the particle's current this.dir with the (weighted)
-		// alignment, cohesion, and separation directions. 
-		// Make sure to update the properties this.dir and this.pos accordingly.
-		// What happens when the new position lies across the field boundary? 
-		
-		this.pos = this.pos
-		this.dir = this.dir 	
-		
+
+		const align = this.multiplyVector(this.alignmentVector(this.S.conf.outerRadius), align_weight)
+		const cohesion = this.multiplyVector(this.cohesionVector(this.S.conf.outerRadius), cohesion_weight)
+		const separation = this.multiplyVector(this.separationVector(this.S.conf.innerRadius), separation_weight)
+
+		let newdir = this.addVectors(this.dir, align)
+		newdir = this.addVectors(newdir, cohesion)
+		newdir = this.addVectors(newdir, separation)
+		this.dir = this.normalizeVector(newdir)
+		this.pos = this.addVectors(this.pos, this.multiplyVector(this.dir, this.speed))
+		this.pos = this.S.wrap(this.pos)
+
+
 	}
-	
+
 }
 
 
