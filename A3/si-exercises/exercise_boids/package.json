@@ -1,0 +1,9 @@
+{
+	"name": "NaCo-Boids",
+	"version": "1.0.0",
+	"dependencies": {
+		"canvas": "^3.1.0",
+		"fs": "^0.0.1-security",
+		"minimist": "^1.2.8"
+	}
+}
