@@ -391,7 +391,7 @@ if( saveImg ) canvas.writePNG( `${imgpath}/boids-t${S.time}.png` )
 console.log( "time,id,x,y")
 
 for( let t = 0; t <= conf.runTime; t++ ){
-	if( saveImg & t % 100 == 0 ){
+	if( saveImg & t % 50 == 0 ){
 		canvas.writePNG( `${imgpath}/boids-t${S.time}.png` )
 	}
 	
