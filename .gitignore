@@ -4,3 +4,5 @@ package-lock.json
 .DS_Store
 .venv/
 .vscode/
+A3/
+A2/negative-selection/snd_cert_*
